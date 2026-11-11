@@ -1,0 +1,492 @@
+
+
+const apiKey = "946988f3dd50043ea8f64d608bcb50aa";
+
+function getWeatherCondition(data) {
+    const temp = data.main.temp;
+    const condition = data.weather[0].main.toLowerCase();
+    const description = data.weather[0].description.toLowerCase();
+    
+    // Check for rain
+    if (condition.includes('rain') || description.includes('rain') || description.includes('drizzle')) {
+        return 'rain';
+    }
+    // Check for snow
+    if (condition.includes('snow') || description.includes('snow')) {
+        return 'snow';
+    }
+    // Check for clear/sunny
+    if (condition.includes('clear') || condition.includes('sun')) {
+        return 'sunny';
+    }
+    // Check temperature extremes
+    if (temp <= 5) {
+        return 'cold';
+    }
+    if (temp >= 30) {
+        return 'hot';
+    }
+    // Default to cloudy
+    return 'cloudy';
+}
+
+function applyWeatherTheme(condition) {
+    const body = document.body;
+    const root = document.documentElement;
+    
+    // Remove all weather classes
+    body.classList.remove('weather-rain', 'weather-snow', 'weather-sunny', 'weather-cold', 'weather-hot', 'weather-cloudy');
+    
+    // Add appropriate class
+    body.classList.add(`weather-${condition}`);
+    
+    // Only change background if not initial load
+    if (!isInitialLoad) {
+        // Set CSS variables and background based on condition
+        switch(condition) {
+            case 'rain':
+                root.style.setProperty('--accent', '#60a5fa');
+                root.style.setProperty('--accent-secondary', '#3b82f6');
+                root.style.setProperty('--bg-gradient-start', '#1e3a5f');
+                root.style.setProperty('--bg-gradient-mid', '#1a2f4a');
+                root.style.setProperty('--bg-gradient-end', '#0f1b2e');
+                document.body.style.background = 'linear-gradient(135deg, #1e3a5f 0%, #1a2f4a 50%, #0f1b2e 100%)';
+                break;
+            case 'snow':
+                root.style.setProperty('--accent', '#a5b4fc');
+                root.style.setProperty('--accent-secondary', '#818cf8');
+                root.style.setProperty('--bg-gradient-start', '#1e293b');
+                root.style.setProperty('--bg-gradient-mid', '#1a2438');
+                root.style.setProperty('--bg-gradient-end', '#0f172a');
+                document.body.style.background = 'linear-gradient(135deg, #1e293b 0%, #1a2438 50%, #0f172a 100%)';
+                break;
+            case 'sunny':
+                root.style.setProperty('--accent', '#fbbf24');
+                root.style.setProperty('--accent-secondary', '#f59e0b');
+                root.style.setProperty('--bg-gradient-start', '#3a2e1f');
+                root.style.setProperty('--bg-gradient-mid', '#2a1f15');
+                root.style.setProperty('--bg-gradient-end', '#1a1209');
+                document.body.style.background = 'linear-gradient(135deg, #3a2e1f 0%, #2a1f15 50%, #1a1209 100%)';
+                break;
+            case 'cold':
+                root.style.setProperty('--accent', '#67e8f9');
+                root.style.setProperty('--accent-secondary', '#22d3ee');
+                root.style.setProperty('--bg-gradient-start', '#0e4a5f');
+                root.style.setProperty('--bg-gradient-mid', '#0a3a4a');
+                root.style.setProperty('--bg-gradient-end', '#062a35');
+                document.body.style.background = 'linear-gradient(135deg, #0e4a5f 0%, #0a3a4a 50%, #062a35 100%)';
+                break;
+            case 'hot':
+                root.style.setProperty('--accent', '#fb7185');
+                root.style.setProperty('--accent-secondary', '#f43f5e');
+                root.style.setProperty('--bg-gradient-start', '#5f1e2e');
+                root.style.setProperty('--bg-gradient-mid', '#4a1a25');
+                root.style.setProperty('--bg-gradient-end', '#35151a');
+                document.body.style.background = 'linear-gradient(135deg, #5f1e2e 0%, #4a1a25 50%, #35151a 100%)';
+                break;
+            default: // cloudy
+                root.style.setProperty('--accent', '#94a3b8');
+                root.style.setProperty('--accent-secondary', '#64748b');
+                root.style.setProperty('--bg-gradient-start', '#1e3a5f');
+                root.style.setProperty('--bg-gradient-mid', '#0f1b2e');
+                root.style.setProperty('--bg-gradient-end', '#0a1628');
+                document.body.style.background = 'linear-gradient(135deg, #1e3a5f 0%, #0f1b2e 50%, #0a1628 100%)';
+        }
+    } else {
+        // On initial load, just set accent colors but keep background
+        switch(condition) {
+            case 'rain':
+                root.style.setProperty('--accent', '#60a5fa');
+                root.style.setProperty('--accent-secondary', '#3b82f6');
+                break;
+            case 'snow':
+                root.style.setProperty('--accent', '#a5b4fc');
+                root.style.setProperty('--accent-secondary', '#818cf8');
+                break;
+            case 'sunny':
+                root.style.setProperty('--accent', '#fbbf24');
+                root.style.setProperty('--accent-secondary', '#f59e0b');
+                break;
+            case 'cold':
+                root.style.setProperty('--accent', '#67e8f9');
+                root.style.setProperty('--accent-secondary', '#22d3ee');
+                break;
+            case 'hot':
+                root.style.setProperty('--accent', '#fb7185');
+                root.style.setProperty('--accent-secondary', '#f43f5e');
+                break;
+            default:
+                root.style.setProperty('--accent', '#94a3b8');
+                root.style.setProperty('--accent-secondary', '#64748b');
+        }
+    }
+}
+
+function createWeatherIcon(condition) {
+    const iconContainer = document.getElementById('weatherIcon');
+    iconContainer.className = `weather-icon weather-icon-${condition}`;
+    
+    let iconHTML = '';
+    switch(condition) {
+        case 'rain':
+            iconHTML = '<div class="rain-icon">🌧️</div>';
+            break;
+        case 'snow':
+            iconHTML = '<div class="snow-icon">❄️</div>';
+            break;
+        case 'sunny':
+            iconHTML = '<div class="sun-icon">☀️</div>';
+            break;
+        case 'cold':
+            iconHTML = '<div class="cold-icon">🧊</div>';
+            break;
+        case 'hot':
+            iconHTML = '<div class="hot-icon">🔥</div>';
+            break;
+        default:
+            iconHTML = '<div class="cloud-icon">☁️</div>';
+    }
+    
+    iconContainer.innerHTML = iconHTML;
+}
+
+function clearFloatingElements() {
+    const container = document.getElementById('floatingElements');
+    container.innerHTML = '';
+}
+
+function createRainDrops() {
+    const container = document.getElementById('floatingElements');
+    const dropCount = 50;
+    
+    for (let i = 0; i < dropCount; i++) {
+        const drop = document.createElement('div');
+        drop.className = 'rain-drop';
+        drop.style.left = Math.random() * 100 + '%';
+        drop.style.animationDelay = Math.random() * 2 + 's';
+        drop.style.animationDuration = (0.5 + Math.random() * 0.5) + 's';
+        container.appendChild(drop);
+    }
+}
+
+function createSnowflakes() {
+    const container = document.getElementById('floatingElements');
+    const flakeCount = 60;
+    
+    for (let i = 0; i < flakeCount; i++) {
+        const flake = document.createElement('div');
+        flake.className = 'snowflake';
+        flake.textContent = '❄';
+        flake.style.left = Math.random() * 100 + '%';
+        flake.style.animationDelay = Math.random() * 3 + 's';
+        flake.style.animationDuration = (3 + Math.random() * 4) + 's';
+        flake.style.fontSize = (12 + Math.random() * 18) + 'px';
+        flake.style.opacity = 0.7 + Math.random() * 0.3;
+        // Add random horizontal drift
+        const drift = (Math.random() - 0.5) * 50;
+        flake.style.setProperty('--drift', drift + 'px');
+        container.appendChild(flake);
+    }
+}
+
+function createClouds() {
+    const container = document.getElementById('floatingElements');
+    const cloudCount = 5;
+    
+    for (let i = 0; i < cloudCount; i++) {
+        const cloud = document.createElement('div');
+        cloud.className = 'floating-cloud';
+        cloud.textContent = '☁';
+        cloud.style.left = Math.random() * 100 + '%';
+        cloud.style.top = (10 + Math.random() * 40) + '%';
+        cloud.style.animationDelay = Math.random() * 5 + 's';
+        cloud.style.animationDuration = (20 + Math.random() * 20) + 's';
+        cloud.style.fontSize = (40 + Math.random() * 40) + 'px';
+        cloud.style.opacity = 0.4 + Math.random() * 0.3;
+        container.appendChild(cloud);
+    }
+}
+
+function createBirds() {
+    const container = document.getElementById('floatingElements');
+    const birdCount = 6;
+    
+    for (let i = 0; i < birdCount; i++) {
+        const bird = document.createElement('div');
+        bird.className = 'bird';
+        bird.textContent = '🕊';
+        bird.style.left = Math.random() * 100 + '%';
+        bird.style.top = (10 + Math.random() * 30) + '%';
+        bird.style.animationDelay = Math.random() * 3 + 's';
+        bird.style.animationDuration = (15 + Math.random() * 10) + 's';
+        bird.style.fontSize = (20 + Math.random() * 15) + 'px';
+        container.appendChild(bird);
+    }
+}
+
+function createFloatingElements(condition) {
+    clearFloatingElements();
+    
+    switch(condition) {
+        case 'rain':
+            createRainDrops();
+            break;
+        case 'snow':
+            createSnowflakes();
+            break;
+        case 'cloudy':
+            createClouds();
+            break;
+        case 'sunny':
+            createBirds();
+            break;
+    }
+}
+
+
+function displayForecast(forecastData) {
+    const forecastBox = document.getElementById('forecastBox');
+    const forecastGrid = document.getElementById('forecastGrid');
+    
+    // Get next 3 days (skip today)
+    const dailyData = {};
+    const today = new Date().toDateString();
+    
+    forecastData.list.forEach(item => {
+        const date = new Date(item.dt * 1000);
+        const dateStr = date.toDateString();
+        
+        if (dateStr !== today && Object.keys(dailyData).length < 3) {
+            if (!dailyData[dateStr]) {
+                dailyData[dateStr] = {
+                    date: date,
+                    temps: [],
+                    conditions: [],
+                    description: item.weather[0].description
+                };
+            }
+            dailyData[dateStr].temps.push(item.main.temp);
+            dailyData[dateStr].conditions.push(item.weather[0].main);
+        }
+    });
+    
+    forecastGrid.innerHTML = '';
+    
+    Object.values(dailyData).slice(0, 3).forEach(day => {
+        const avgTemp = (day.temps.reduce((a, b) => a + b, 0) / day.temps.length).toFixed(1);
+        const mostCommonCondition = day.conditions.sort((a, b) =>
+            day.conditions.filter(v => v === a).length - day.conditions.filter(v => v === b).length
+        ).pop();
+        
+        const dayName = day.date.toLocaleDateString('en-US', { weekday: 'short' });
+        const dateStr = day.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        
+        const forecastItem = document.createElement('div');
+        forecastItem.className = 'forecast-item';
+        forecastItem.innerHTML = `
+            <div class="forecast-day">${dayName}</div>
+            <div class="forecast-date">${dateStr}</div>
+            <div class="forecast-temp">${avgTemp}°C</div>
+            <div class="forecast-condition">${day.description}</div>
+        `;
+        forecastGrid.appendChild(forecastItem);
+    });
+    
+    forecastBox.style.display = 'block';
+}
+
+async function getWeather() {
+    const cityInput = document.getElementById("city");
+    const messageEl = document.getElementById("message");
+    const weatherBox = document.getElementById("weatherBox");
+    const forecastBox = document.getElementById("forecastBox");
+
+    const city = cityInput.value.trim();
+
+    // reset message styles
+    messageEl.textContent = "";
+    messageEl.className = "message";
+
+    if (!city) {
+        messageEl.textContent = "Please enter a city name.";
+        messageEl.classList.add("error");
+        weatherBox.style.display = "none";
+        forecastBox.style.display = "none";
+        return;
+    }
+
+    if (!apiKey || apiKey === "YOUR_API_KEY_HERE") {
+        messageEl.textContent = "Add a valid OpenWeatherMap API key in script.js.";
+        messageEl.classList.add("error");
+        weatherBox.style.display = "none";
+        forecastBox.style.display = "none";
+        return;
+    }
+
+    const currentUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(
+        city
+    )}&appid=${apiKey}&units=metric`;
+    
+    const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(
+        city
+    )}&appid=${apiKey}&units=metric`;
+
+    try {
+        messageEl.textContent = "Fetching weather data...";
+        messageEl.classList.remove("error", "success");
+
+        // Fetch current weather and forecast
+        const [currentResponse, forecastResponse] = await Promise.all([
+            fetch(currentUrl),
+            fetch(forecastUrl)
+        ]);
+
+        if (!currentResponse.ok || !forecastResponse.ok) {
+            const rawBody = await currentResponse.text();
+            let apiMessage = "";
+            try {
+                const errJson = JSON.parse(rawBody);
+                apiMessage = errJson.message || "";
+            } catch (e) {
+                // ignore parse error
+            }
+
+            if (currentResponse.status === 401) {
+                throw new Error(
+                    apiMessage
+                        ? `API Error (401): ${apiMessage}`
+                        : "API key is invalid or not active. Check it on OpenWeatherMap."
+                );
+            } else if (currentResponse.status === 404) {
+                throw new Error(apiMessage || "City not found. Please check the spelling.");
+            } else {
+                throw new Error(apiMessage || "Unable to fetch weather data. Try again.");
+            }
+        }
+
+        const currentData = await currentResponse.json();
+        const forecastData = await forecastResponse.json();
+
+        // Determine weather condition
+        const condition = getWeatherCondition(currentData);
+        
+        // Mark that we're no longer on initial load
+        isInitialLoad = false;
+        
+        // Apply theme, icon, and floating elements (this will change background)
+        applyWeatherTheme(condition);
+        createWeatherIcon(condition);
+        createFloatingElements(condition);
+
+        document.getElementById("cityName").textContent =
+            `Weather in ${currentData.name}, ${currentData.sys.country}`;
+        document.getElementById("temp").textContent =
+            `${currentData.main.temp.toFixed(1)} °C`;
+        document.getElementById("feelsLike").textContent =
+            `${currentData.main.feels_like.toFixed(1)} °C`;
+        document.getElementById("humidity").textContent =
+            `${currentData.main.humidity}%`;
+        document.getElementById("wind").textContent =
+            `${currentData.wind.speed} m/s`;
+        document.getElementById("condition").textContent =
+            currentData.weather[0].description;
+
+        // Display forecast
+        displayForecast(forecastData);
+
+        weatherBox.style.display = "block";
+        messageEl.textContent = "Data loaded successfully.";
+        messageEl.classList.add("success");
+    } catch (err) {
+        console.error("Fetch error:", err);
+        weatherBox.style.display = "none";
+        forecastBox.style.display = "none";
+        clearFloatingElements();
+        messageEl.textContent = err.message || "Some error occurred.";
+        messageEl.classList.add("error");
+    }
+}
+
+function createInitialAnimations() {
+    // Create a mix of animated elements for the front page
+    const container = document.getElementById('floatingElements');
+    
+    // Add some clouds
+    for (let i = 0; i < 4; i++) {
+        const cloud = document.createElement('div');
+        cloud.className = 'floating-cloud';
+        cloud.textContent = '☁';
+        cloud.style.left = Math.random() * 100 + '%';
+        cloud.style.top = (10 + Math.random() * 40) + '%';
+        cloud.style.animationDelay = Math.random() * 5 + 's';
+        cloud.style.animationDuration = (20 + Math.random() * 20) + 's';
+        cloud.style.fontSize = (40 + Math.random() * 40) + 'px';
+        cloud.style.opacity = 0.4 + Math.random() * 0.3;
+        container.appendChild(cloud);
+    }
+    
+    // Add some birds
+    for (let i = 0; i < 3; i++) {
+        const bird = document.createElement('div');
+        bird.className = 'bird';
+        bird.textContent = '🕊';
+        bird.style.left = Math.random() * 100 + '%';
+        bird.style.top = (10 + Math.random() * 30) + '%';
+        bird.style.animationDelay = Math.random() * 3 + 's';
+        bird.style.animationDuration = (15 + Math.random() * 10) + 's';
+        bird.style.fontSize = (20 + Math.random() * 15) + 'px';
+        container.appendChild(bird);
+    }
+    
+    // Add some light rain drops
+    for (let i = 0; i < 20; i++) {
+        const drop = document.createElement('div');
+        drop.className = 'rain-drop';
+        drop.style.left = Math.random() * 100 + '%';
+        drop.style.animationDelay = Math.random() * 2 + 's';
+        drop.style.animationDuration = (0.8 + Math.random() * 0.7) + 's';
+        drop.style.opacity = 0.3;
+        container.appendChild(drop);
+    }
+    
+    // Add some snowflakes
+    for (let i = 0; i < 15; i++) {
+        const flake = document.createElement('div');
+        flake.className = 'snowflake';
+        flake.textContent = '❄';
+        flake.style.left = Math.random() * 100 + '%';
+        flake.style.animationDelay = Math.random() * 3 + 's';
+        flake.style.animationDuration = (4 + Math.random() * 3) + 's';
+        flake.style.fontSize = (10 + Math.random() * 12) + 'px';
+        flake.style.opacity = 0.4 + Math.random() * 0.3;
+        container.appendChild(flake);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    // Create initial animated front page
+    createInitialAnimations();
+    
+    // Set initial dark blue theme
+    const root = document.documentElement;
+    root.style.setProperty('--bg-gradient-start', '#0f1b2e');
+    root.style.setProperty('--bg-gradient-mid', '#1e3a5f');
+    root.style.setProperty('--bg-gradient-end', '#0a1628');
+    document.body.style.background = 'linear-gradient(135deg, #0f1b2e 0%, #1e3a5f 50%, #0a1628 100%)';
+    
+    // dynamic year
+    const yearSpan = document.getElementById("year");
+    if (yearSpan) {
+        yearSpan.textContent = new Date().getFullYear();
+    }
+
+    // button listener
+    document.getElementById("searchBtn").addEventListener("click", getWeather);
+
+    // enter key
+    document.getElementById("city").addEventListener("keyup", (e) => {
+        if (e.key === "Enter") {
+            getWeather();
+        }
+    });
+});
